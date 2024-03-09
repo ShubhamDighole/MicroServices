@@ -1,0 +1,96 @@
+	|---------------------------EUREKA SERVICE REGISTRY--------------------------------|
+	|										   |
+	|				ORDER SERVICE					   |
+	|	API GATEWAY								   |
+	|				PAYMENT SERVICE					   | 	
+	|										   |
+	|--------------------------------------------------------------------------------  |
+
+
+
+
+
+We will first register the above 2 microservices to euereka service registry so that they can talk to each other.
+
+Then we will add API GATEWAY	--> This will help us to auto-redirect the request received to corresponding microservice.
+
+These microservice will have their individual databases.
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+To Test order service
+
+POST
+http://localhost:9192/order/saveOrder
+
+
+{
+    "id":1,
+    "name":"shubham",
+    "qty":10,
+    "price":100.0
+}
+
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+To test the payment service
+
+
+POST
+
+http://localhost:9191/Payment/SavePayment
+
+{
+  "status" : "success"
+}
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+We are using h2 database in this project so, use URL like
+ 
+http://localhost:9192/h2-console
+
+and if in case getting exception like 
+
+User
+Database "C:/Users/shubham/test" not found, either pre-create it or allow remote database creation (not recommended in secure environments) [90149-224] 90149/9014
+
+make below changes :
+
+server:
+  port: 9191
+
+spring:
+  h2:
+    console:
+      enabled: true
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+
+add jdbc url like above and on UI make JDBC URL = 'jdbc:h2:mem:testdb'
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+Now, we have created one payment and one order service.
+
+But we need to do OneToMany or ManyToOne association mapping to get to know linking between both the tables.
+But in microServices its not a good practise to do the association mapping.
+
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+After we integrate the call of payment from order
+
+
+{
+    "order":{
+    "id":103,
+    "name":"Shubham",
+    "qty":1,
+    "price":800
+    },
+    "payment":{
+
+    }
+}
