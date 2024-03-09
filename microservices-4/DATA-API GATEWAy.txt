@@ -1,0 +1,76 @@
+	|---------------------------EUREKA SERVICE REGISTRY--------------------------------|
+	|			    /order						   |
+	|			|--------------->ORDER SERVICE				   |
+	|			|							   |
+	|			|							   |
+	|			|							   |
+	|request		|							   |
+	|----->	API GATEWAY-----|							   |
+	|			|							   |
+	|			|							   |
+	|			|  /payment						   |
+	|			|-------------->PAYMENT SERVICE				   | 	
+	|										   |
+	|--------------------------------------------------------------------------------  |
+
+
+Suppose Request is coming with /order then the order must be redirect to Order Service and if request is with /payment then order must be redirect to the Payment Service.
+
+So the client cannot talk to the micro services directly, First then will call the API GATEWAY and on basis of pattern configure the micro-service will be called.
+
+
+++--+-+-+--+-+-+-+-+-+++--+-+-+--+-+-+-+-+-+++--+-+-+--+-+-+-+-+-+++--+-+-+--+-+-+-+-+-+++--+-+-+--+-+-+-+-+-+++--+-+-+--+-+-+-+-+-+++--+-+-+--+-+-+-+-+-+
+
+1. Create one springboot project
+	ADD Dependencies: GATEWAY,
+			  EUREKA SERVICE DISCOVERY (bcoz we are registering on it)
+			  ACTUATOR (For testing the application purpose)
+
+
+use         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+This depenedency for gateway
+
+
+2. In main class use @EnableDiscoveryClient (This is only for latest version of springboot or else @EnableEurekaclient)
+
+3. For configurations we can use java base configuration. But we will use application.yml file based
+
+server:
+  port: 8989
+
+spring:
+  application:
+    name: GATEWAY-SERVICE  
+
+  cloud:
+    gateway:
+      routes:
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order/**
+
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/payment/**     
+            
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+
+
+
+4. Now up all the services--> COnfig, paymentService, orderService, Gateway
+
+and if we check http://localhost:8761/ we will see 3 services running,
+
+if we hit any URL with http://localhost:8989/Payment/SavePayment (changing the port to 8989) we will get the same result as we have register all services to 8989. 
