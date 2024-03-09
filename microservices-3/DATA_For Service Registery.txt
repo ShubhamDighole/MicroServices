@@ -1,0 +1,68 @@
+Code :
+
+1. Create new project and have eureka server dependency
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+		</dependency>
+
+2. In main Springboot class
+
+add @EnableEurekaServer on class level
+
+3. In application.yml file
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+server:
+  port: 8761
+
+because this is not our client, this is our server. That's why we are making the above changes.
+and 8761 is default port of eureak. So we will keep same
+
+Run the server and we will get "http://localhost:8761/"
+
+
+++++++-----
+
+1.In both payment and order service
+
+2.First add Depnedency and then annotate main class with @EnableEurekaServer 
+
+3.then application.yml file
+
+  application:
+    name: ORDER-SERVICE
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost 
+
+and also add application Name
+
+spring:
+  application:
+    name: ORDER-SERVICE 
+
+4. Now update the hardcoded value that we have added in the last project to call the payment-service
+	So,add our new code will look like
+				Payment paymentResponse = restTemplate.postForObject("http://PAYMENT-SERVICE/Payment/SavePayment",
+									payment, Payment.class);
+5. up all the services and hit the below URL again, and we wil see the services are up
+http://localhost:8761/
+
+6. Add @LoadBalanced on the top of RestTemplate. So, our new code will be like 
+
+	@Bean
+	@LoadBalanced
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
